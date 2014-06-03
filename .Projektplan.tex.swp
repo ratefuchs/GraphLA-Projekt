@@ -16,8 +16,11 @@ PubWeb ist ein Algorithmus zur geometrischen Generierung von Netzwerken. Knoten 
 \subsection{Gitter (Sarah)}
 \begin{itemize}
 \item Reguläres Gitter: Fest vorgegebene Breite $b$ und Höhe $h$, Zellen in $b \times h$, äquidistante Abstände. Die Raumteilung ist dadurch fest vorgegeben.
-\item Adaptives Gitter: Das Gitter ``baut sich selbst'', da wo mehr Punkte liegen, gibt es eine feinere Unterteilung.
-\item Beides in eigene Klasse.
+\item Adaptives Gitter (z.B. Quadtree): Das Gitter ``baut sich selbst'', da wo mehr Knoten liegen, gibt es eine feinere Unterteilung.
+\item Eingaben: Beim regulären Gitter $b$, $h$ (alternativ: Zellengröße) und Weltgröße als Eingaben;  beim adaptiven Weltgröße und Parameter $\gamma \in [0,1]$, der aussagt wieviel Prozent der gesamten Anzahl Knoten in jeder Zelle sein soll (gibt quasi die Granularität an). Alternativ: Pro Zelle ein Knoten. 
+\item Schnittstelle: Knoten mit geg. Koordinaten hinzufügen, Knoten in einer Gitterzelle zurückgeben, Knoten in Nachbarzellen zurückgeben (mit übergebener Nachbarschaftsdefinition), Knoten mit Abstand kleiner-gleich übergebenen Wert zu übergebenem Knoten zurückgeben.
+\item Geplant: Zweidimensionale Gitter; Erweiterung auf Mehrdimensionalität, falls erwünscht. Es wird sich auf kartesische Gitter beschränkt.
+\item Anbindung: Beides in jeweils eigene Klasse. Vermutlich graph/Graph.* für die Knoten. Anbindung an PubWerb: Wie beim kD-Baum.
 \end{itemize}
 
 \subsection{kd-Baum (Simon)}
@@ -43,8 +46,8 @@ Die Kanten werden nach folgendem Verfahren generiert:
 \caption{Ein Ring Lattice, hier allerdings mit schwankender Anzahl Nachbarn. Aber das Prinzip wird deutlich. Bild von \url{http://www.learner.org/courses/mathilluminated/images/units/11/ring.png}}
 \end{figure}
 Nummeriere die Knoten durch, sodass $V = \{v_0, \ldots, v_{n-1}\}$. Dann gilt
-$$(v_i,v_j) \in E \Leftrightarrow 0 < |i-j| \mod (n-\frac{K}{2}) \leq \frac{K}{2}$$
-\item Betrachte für jeden Knoten $v_i$ jede Kante $(n_i, n_j)$ mit $i<j$ und ändere sie mit Wahrscheinlichkeit $\beta$ um. Umändern geht, indem die Kante $(v_i, v_j)$ mit einer Kante $(v_i, v_k)$ ersetzt wird wobei $k \neq i$ und aus den noch-nicht-Nachbarn von $v_i$ gleichverteilt ein $v_k$ gezogen wird.
+$$\{v_i,v_j\} \in E \Leftrightarrow 0 < |i-j| \mod (n-\frac{K}{2}) \leq \frac{K}{2}$$
+\item Betrachte für jeden Knoten $v_i$ jede Kante $\{v_i, v_j\}$ mit $i<j$ und ändere sie mit Wahrscheinlichkeit $\beta$ um. Umändern geht, indem die Kante $\{v_i, v_j\}$ mit einer Kante $\{v_i, v_k\}$ ersetzt wird wobei $k \neq i$ und aus den noch-nicht-Nachbarn von $v_i$ gleichverteilt ein $v_k$ gezogen wird.
 \end{enumerate}
 
 \begin{itemize}
@@ -57,7 +60,23 @@ Einbindung in NetworKit:
 Ring Lattices in extra Klasse auslagern (machen auch ohne den Rest Sinn), Watts-Strogatz in eigener Klasse in generators, vermutlich werden dieselben Klassen wie bei ForestFire benötigt (außer der Ordner dynamics).
 
 \subsection{Dorogovtsev-Mendes (Sarah)}
-Ist wohl schon implementiert?
+
+\begin{enumerate}
+\item Starte mit Dreieck (3 Knoten, 3 Kanten)
+\item Füge in jedem Schritt einen neuen Knoten $x$ und zwei Kanten hinzu. Wähle zufällig eine bereits bestehende Kante $\{u,v\}$ und erstelle die beiden Kanten $\{x,u\}$ und $\{x,v\}$.
+\end{enumerate}
+
+\begin{itemize}
+\item Vorteil: Gibt planaren Graphen zurück, produziert power-low degree distribution (Knoten mit höherem Grad haben bessere Chancen stärker vernetzt zu werden)
+\end{itemize}
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=0.5]{doro.png}
+\caption{Sieht dann so aus. Bild von \url{http://graphstream-project.org/doc/Generators/Dorogovtsev-Mendes-Generator_1.0/}}
+\end{figure}
+
+Ist wohl schon in NetworKit implementiert (DynamicDorogotsevMendesGenerator.cpp)?
 
 \subsection{Forest Fire (Simon)}
 Das Forest-Fire-Modell ist ein randomisiertes Verfahren zur Generierung von Kleine-Welt-Netzwerken, welches also die Bedingungen des Potenzgesetzes und die der kurzen Distanz erfüllt. Die Kantenzahl wächst im Gegensatz zu manch anderen Modellen superlinear in der Knotenzahl. Immer, wenn ein Knoten neu hinzukommt, wird er mit einem zufälligen Knoten ("Botschafter") verbunden. Von diesem aus werden weitere Nachbarn zufällig ausgewählt, die Anzahl wird in Abhängigkeit eines "Entflammbarkeitsparameter" $p$ durch eine geometrische Verteilung mit Mittelwert $\frac{p}{1-p}$ beschrieben (also wird mit Wahrscheinlichkeit $p$ ein zusätzlicher Nachbar gesucht; dies endet beim ersten Fehlschlag). Dies wird rekursiv wiederholt, wobei Knoten höchstens einmal besucht werden. Für den neu hinzugefügten Knoten werden Kanten zu allen so gefundenen Knoten hinzugefügt. Für ungerichtete Graphen ist die Wahrscheinlichkeit $r$ für Rückwärtssuchen irrelevant.\\
