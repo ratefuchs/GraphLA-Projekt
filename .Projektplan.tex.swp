@@ -16,16 +16,31 @@ PubWeb ist ein Algorithmus zur geometrischen Generierung von Netzwerken. Knoten 
 \subsection{Gitter (Sarah)}
 \begin{itemize}
 \item Reguläres Gitter: Fest vorgegebene Breite $b$ und Höhe $h$, Zellen in $b \times h$, äquidistante Abstände. Die Raumteilung ist dadurch fest vorgegeben.
-\item Adaptives Gitter (z.B. Quadtree): Das Gitter ``baut sich selbst'', da wo mehr Knoten liegen, gibt es eine feinere Unterteilung.
-\item Eingaben: Beim regulären Gitter $b$, $h$ (alternativ: Zellengröße) und Weltgröße als Eingaben;  beim adaptiven Weltgröße und Parameter $\gamma \in [0,1]$, der aussagt wieviel Prozent der gesamten Anzahl Knoten in jeder Zelle sein soll (gibt quasi die Granularität an). Alternativ: Pro Zelle ein Knoten. 
-\item Schnittstelle: Knoten mit geg. Koordinaten hinzufügen, Knoten in einer Gitterzelle zurückgeben, Knoten in Nachbarzellen zurückgeben (mit übergebener Nachbarschaftsdefinition), Knoten mit Abstand kleiner-gleich übergebenen Wert zu übergebenem Knoten zurückgeben.
-\item Geplant: Zweidimensionale Gitter; Erweiterung auf Mehrdimensionalität, falls erwünscht. Es wird sich auf kartesische Gitter beschränkt.
-\item Anbindung: Beides in jeweils eigene Klasse. Vermutlich graph/Graph.* für die Knoten. Anbindung an PubWerb: Wie beim kD-Baum.
+\item Eingaben:
+\begin{itemize}
+\item Anzahl Zeilen $b$, Anzahl Spalten $h$ und Weltgröße $(x_{min}, x_{max}, y_{min}, y_{max})$ $\leadsto$ ergibt ein uniformes $b \times h$--Gitter
+\item Alternativ: Weltgröße und Radius $r$ $\leadsto$ ergibt Zellen der Größe $r \times r$ 
+\end{itemize}
+\item Schnittstelle: Knoten mit geg. Koordinaten hinzufügen, alle Knoten in einer Gitterzelle zurückgeben, Knoten mit Abstand kleiner-gleich übergebenen Wert zu übergebenem Knoten zurückgeben.
+\item Geplant: Zweidimensionales kartesisches Gitter.
+\item Anbindung: In eigene Klasse. Vermutlich graph/Graph.* für die Knoten. Anbindung an PubWeb: Wie beim kD-Baum.
+\end{itemize}
+
+\subsection{Range Tree (Sarah)}
+\begin{itemize}
+\item Auch wieder zweidimensional.
+\item Abfragezeit in $\mathcal{O}(\log n + k)$ (besser als kD-Tree, der hat $\mathcal{O}(\sqrt{n} + k)$), Speicherbedarf in $\mathcal{O}(n \log n)$ (schlechter als kD-Tree, der hat $\mathcal{O}(n)$), Aufbauzeit wie bei kD-Tree in $\mathcal{O}(n \log n)$
+\item Funktionsweise siehe \url{http://i11www.iti.uni-karlsruhe.de/_media/teaching/sommer2014/compgeom/algogeom-ss14-vl05.pdf} (grobe Idee: 1d-Rangetree für x-Achse, an jedem Knoten 1d-Rangetree für y-Achse)
+\item Schnittstelle: Knoten mit geg. Koordinaten hinzufügen, alle Knoten mit Abstand kleiner-gleich übergebenen Wert zurückgeben
+\item Anbindung: Siehe Gitter.
 \end{itemize}
 
 \subsection{kd-Baum (Simon)}
 Ein kd-Baum ist eine räumliche Datenstruktur. Der Raum wird hierfür rekursiv jeweils achsenparallel in zwei Teile geteilt, ein (i.A. unbalancierter) Binärbaum entsteht. Meist unterteilt man dabei die Achse mit der größten Ausdehnung. Zur Bestimmung, wo geteilt wird, gibt es mehrere Möglichkeiten. Implementiert werden der Aufbau der Datenstruktur nach dem Objekt-Median und dem räumliche Median, optional je nach Zeitreserven auch nach der Surface-Area-Heuristik (welche den durchschnittlichen Aufwand senken kann). Für die Anbindung an PubWeb wird eine Methode implementiert, die von einem gegebenen Knoten aus die Knoten unter einer bestimmten Entfernung zurückgibt.\\
 Benutzt (und wenn nötig angepasst) werden voraussichtlich generators/PubWebGenerator.* und generators/DynamicPubWebGenerator.* für die Anbindung an PubWeb. graph/Graph.* wird für Graphoperationen verwendet. Für den kd-Baum soll eine eigene Klasse neu erstellt werden.
+
+\subsection{Experimenteller Vergleich der geg. Datenstrukturen (Beide?)}
+Gitter, kD-Tree, Range-Tree, Quadtree
 
 \section{Generierung dynamischer Graphen}
 \subsection{Watts-Strogatz (Sarah)}
@@ -76,7 +91,7 @@ Ring Lattices in extra Klasse auslagern (machen auch ohne den Rest Sinn), Watts-
 \caption{Sieht dann so aus. Bild von \url{http://graphstream-project.org/doc/Generators/Dorogovtsev-Mendes-Generator_1.0/}}
 \end{figure}
 
-Ist wohl schon in NetworKit implementiert (DynamicDorogotsevMendesGenerator.cpp)?
+Ist schon (sowohl in statisch als auch in dynamisch) in NetworKit implementiert (z.B. DynamicDorogotsevMendesGenerator.cpp). Von daher besteht die Aufgabe darin, die bereits vorhandene Implementierung zu testen und insbesondere die statischen und dynamischen Ergebnisse zu vergleichen.
 
 \subsection{Forest Fire (Simon)}
 Das Forest-Fire-Modell ist ein randomisiertes Verfahren zur Generierung von Kleine-Welt-Netzwerken, welches also die Bedingungen des Potenzgesetzes und die der kurzen Distanz erfüllt. Die Kantenzahl wächst im Gegensatz zu manch anderen Modellen superlinear in der Knotenzahl. Immer, wenn ein Knoten neu hinzukommt, wird er mit einem zufälligen Knoten ("Botschafter") verbunden. Von diesem aus werden weitere Nachbarn zufällig ausgewählt, die Anzahl wird in Abhängigkeit eines "Entflammbarkeitsparameter" $p$ durch eine geometrische Verteilung mit Mittelwert $\frac{p}{1-p}$ beschrieben (also wird mit Wahrscheinlichkeit $p$ ein zusätzlicher Nachbar gesucht; dies endet beim ersten Fehlschlag). Dies wird rekursiv wiederholt, wobei Knoten höchstens einmal besucht werden. Für den neu hinzugefügten Knoten werden Kanten zu allen so gefundenen Knoten hinzugefügt. Für ungerichtete Graphen ist die Wahrscheinlichkeit $r$ für Rückwärtssuchen irrelevant.\\
