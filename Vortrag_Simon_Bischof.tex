@@ -1,0 +1,73 @@
+\documentclass{beamer}
+
+\usepackage{sdq/templates/beamerthemekit}
+
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage[TS1,T1]{fontenc}
+\usepackage{array}
+\usepackage{xspace}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[scaled]{beramono}
+\usepackage{picins}
+
+\newcommand{\N}{\mathbb{N}}
+
+\author{Simon Bischof}
+\title{Projektarbeit zur Vorlesung \glqq Graphalgorithmen und lineare Algebra Hand in Hand\grqq}
+\subtitle{\glqq Dynamische Graphen generieren\grqq}
+\date{17. Juli 2014}
+\titleimage{images/title.png}
+
+\begin{document}
+
+\shorthandoff{"}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Kleine-Welt-Netzwerke}
+\begin{itemize}
+\item hohe Clusterung
+\item geringe durchschnittliche Pfadlänge
+\item Bildung von Hubs
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Watts-Strogatz}
+\begin{enumerate}
+\item Generieren eines regulären Ringgitters
+\item Neuverbinden von Kanten mit bestimmter Wahrscheinlichkeit
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Dorogotsev-Mendes}
+\begin{enumerate}
+\item Start mit einem Dreieck
+\item Hinzufügen von Knoten:\pause
+\begin{itemize}
+\item Wähle zufällige Kante
+\item Verbinde den Knoten mit den Kantenenden
+\end{itemize}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Forest-Fire}
+\begin{enumerate}
+\item Start mit einem einzelnen Knoten
+\item Hinzufügen von Knoten:\pause
+\begin{itemize}
+\item Wähle zufälligen Knoten
+\item Simuliere ein von dort aus startendes Feuer\pause
+\item Setze von einem Knoten eine Anzahl (zufällig nach geometrischer Verteilung) noch nicht brennender Knoten in Brand
+\item Verbinde den Knoten mit allen brennenden Knoten
+\end{itemize}
+\end{enumerate}
+\end{frame}
+\end{document}
